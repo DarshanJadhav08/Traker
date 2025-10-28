@@ -38,3 +38,10 @@ def add_expense(
     db.commit()
     db.refresh(new_expense)
     return RedirectResponse("/", status_code=303)
+
+import os
+import uvicorn
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=port, reload=True)
