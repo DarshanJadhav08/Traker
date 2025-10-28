@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Expense Tracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-5">
+  <div class="container">
+    <h2 class="text-center mb-4">💰 Expense Tracker</h2>
+
+    <div class="d-flex justify-content-end mb-3">
+      <a href="/add" class="btn btn-primary">➕ Add New Expense</a>
+    </div>
+
+    <table class="table table-striped table-bordered shadow-sm">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Amount (₹)</th>
+          <th>Description</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in expenses %}
+        <tr>
+          <td>{{ e.id }}</td>
+          <td>{{ e.date }}</td>
+          <td>{{ e.category }}</td>
+          <td>{{ e.amount }}</td>
+          <td>{{ e.description }}</td>
+          <td>
+            <a href="/delete/{{ e.id }}" class="btn btn-danger btn-sm">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="alert alert-success text-center fw-bold mt-4">
+      Total Expense: ₹{{ total }}
+    </div>
+  </div>
+</body>
+</html>
