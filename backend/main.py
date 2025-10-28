@@ -4,44 +4,60 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import date
-from backend.database import Base, engine
-from backend import models
-Base.metadata.create_all(bind=engine)
-exit()
-from backend import models, schemas, database
+from backend import models, database
+import os
+import uvicorn
 
-# Create tables
+# ✅ Create all database tables
 models.Base.metadata.create_all(bind=database.engine)
 
+# ✅ Initialize app
 app = FastAPI()
 
-# Static + Templates
+# ✅ Static and Templates setup
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 templates = Jinja2Templates(directory="frontend/templates")
 
+
+# ✅ Home route - show all expenses
 @app.get("/")
 def home(request: Request, db: Session = Depends(database.get_db)):
     expenses = db.query(models.Expense).all()
     total = sum(e.amount for e in expenses)
-    return templates.TemplateResponse("index.html", {"request": request, "expenses": expenses, "total": total})
+    return templates.TemplateResponse(
+        "index.html", {"request": request, "expenses": expenses, "total": total}
+    )
 
-@app.post("/add_expense")
+
+# ✅ Show Add Expense Form Page
+@app.get("/add")
+def show_add_form(request: Request):
+    return templates.TemplateResponse("add_expense.html", {"request": request})
+
+
+# ✅ Add Expense - Form Submission
+@app.post("/add")
 def add_expense(
     request: Request,
     title: str = Form(...),
     amount: float = Form(...),
     category: str = Form(...),
-    db: Session = Depends(database.get_db)
+    date_value: str = Form(...),
+    db: Session = Depends(database.get_db),
 ):
-    new_expense = models.Expense(title=title, amount=amount, category=category, date=date.today())
+    # Convert date from string to Python date
+    expense_date = date.fromisoformat(date_value)
+
+    new_expense = models.Expense(
+        title=title, amount=amount, category=category, date=expense_date
+    )
     db.add(new_expense)
     db.commit()
     db.refresh(new_expense)
     return RedirectResponse("/", status_code=303)
 
-import os
-import uvicorn
 
+# ✅ Run app
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run("backend.main:app", host="0.0.0.0", port=port, reload=True)
