@@ -5,8 +5,6 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import date
 from backend import models, database
-import os
-import uvicorn
 
 # ✅ Create all database tables
 models.Base.metadata.create_all(bind=database.engine)
@@ -45,7 +43,7 @@ def add_expense(
     date_value: str = Form(...),
     db: Session = Depends(database.get_db),
 ):
-    # Convert date from string to Python date
+    # Convert date string to Python date
     expense_date = date.fromisoformat(date_value)
 
     new_expense = models.Expense(
@@ -55,9 +53,3 @@ def add_expense(
     db.commit()
     db.refresh(new_expense)
     return RedirectResponse("/", status_code=303)
-
-
-# ✅ Run app
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=port, reload=True)
